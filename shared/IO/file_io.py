@@ -3,12 +3,13 @@ import os
 
 from ..Constants import *
 
+
 class BinaryReader:
     """
     Wrapper class to simplify reading data of various types
     from a binary file (assumes big-endian byte order)
     """
-    
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.file = open(filepath, 'rb')
@@ -34,7 +35,7 @@ class BinaryReader:
                 for i in range(3):
                     self.seek(address + offset + (i * 16))
                     rows.append(list(struct.unpack('>4f', self.file.read(16))))
-                rows.append([0,0,0,1])
+                rows.append([0, 0, 0, 1])
                 return rows
             else:
                 format = get_primitive_type_format(type)
@@ -49,7 +50,7 @@ class BinaryReader:
         and converts it to an ascii string
         """
         s = ''
-        nextChar = self.file.read(1)[0] # converts byte to int
+        nextChar = self.file.read(1)[0]  # converts byte to int
         while nextChar != 0:
             s += chr(nextChar)
             nextChar = self.file.read(1)[0]
@@ -76,18 +77,19 @@ class BinaryReader:
         """Closes the BinaryReader's file"""
         self.file.close()
 
+
 class BinaryWriter:
     """
     Wrapper class to simplify writing data of various types
     to a binary file (uses big-endian byte order)
     """
-    
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.file = open(filepath, 'wb+')
 
     def currentAddress(self):
-    	return self.file.tell()
+        return self.file.tell()
 
     def seek(self, offset, whence='start'):
         """
@@ -109,14 +111,15 @@ class BinaryWriter:
         relative to `whence` ('start' or 'current')
         """
         if offset != None:
-        	self.seek(offset, whence)
-        
+            self.seek(offset, whence)
+
         if is_primitive_type(type):
             if type == 'void':
                 return
             elif type == 'string':
                 # TODO: confirm if this includes null terminator byte
-                self.file.write(bytes(data, 'utf-8'))
+                # self.file.write(bytes(data, 'utf-8'))
+                pass
             elif type == 'vec3':
                 for i in range(3):
                     self.file.write(struct.pack('>f', data[i]))
@@ -128,12 +131,13 @@ class BinaryWriter:
                         self.file.write(struct.pack('>f', row[j]))
             else:
                 format = get_primitive_type_format(type)
-                self.file.write(struct.pack(format, data))
+                try:
+                    self.file.write(struct.pack(format, data))
+                except:
+                    print("Got here")
         else:
             raise InvalidPrimitiveTypeError()
 
     def close(self):
         """Closes the BinaryWriter's file"""
         self.file.close()
-
-

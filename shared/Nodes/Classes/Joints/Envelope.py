@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Envelope
 class EnvelopeList(Node):
-    class_name = "Envelope List"
     is_cachable = False
     fields = [
     ]
@@ -15,11 +15,11 @@ class EnvelopeList(Node):
 
         envelopes = []
         current_offset = self.address
-        envelope = parser.read("Envelope", current_offset)
+        envelope = parser.read('Envelope', current_offset)
         while envelope.joint:
             envelopes.append(envelope)
             current_offset += 8
-            envelope = parser.read("Envelope", current_offset)
+            envelope = parser.read('Envelope', current_offset)
 
         self.envelopes = envelopes
 

@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Archive Header
 class ArchiveHeader(Node):
-    class_name = "Archive Header"
     is_cachable = False
     is_in_data_section = False
     fields = [
@@ -33,11 +33,15 @@ class ArchiveHeader(Node):
 
         current_offset = sections_start
         for i in range(self.public_nodes_count):
-            section_addresses.append( (current_offset, True) )
+            section_addresses.append((current_offset, True))
             current_offset += section_size
 
         for i in range(self.external_nodes_count):
-            section_addresses.append( (current_offset, False) )
+            section_addresses.append((current_offset, False))
             current_offset += section_size
 
         self.section_addresses = section_addresses
+
+    def allocationSize(self):
+        # is length 20 or 32? first set as 32, then code in DATParser overwrites it to 20
+        return self.length

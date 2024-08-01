@@ -8,9 +8,9 @@ from ..Mesh import *
 from ...Node import Node
 from ....Constants import *
 
+
 # Model Set
 class ModelSet(Node):
-    class_name = "Model Set"
     fields = [
         ('root_joint', 'Joint'),
         ('animated_joints', 'AnimationJoint[]'),
@@ -63,16 +63,16 @@ class ModelSet(Node):
         self.id = builder.armature_count
         builder.armature_count += 1
 
-        armature_data = bpy.data.armatures.new(name = armature_name)
-        armature = bpy.data.objects.new(name = armature_name, object_data = armature_data)
+        armature_data = bpy.data.armatures.new(name=armature_name)
+        armature = bpy.data.objects.new(name=armature_name, object_data=armature_data)
 
-        #TODO: Seperate Object hierarchy from armatures via Skeleton flags
-        #rotate armature into proper orientation
-        #needed due to different coordinate systems
-        armature.matrix_basis = Matrix.Translation(Vector((0,0,0)))
+        # TODO: Seperate Object hierarchy from armatures via Skeleton flags
+        # rotate armature into proper orientation
+        # needed due to different coordinate systems
+        armature.matrix_basis = Matrix.Translation(Vector((0, 0, 0)))
         self.translate_coordinate_system(armature)
 
-        #make an instance in the scene
+        # make an instance in the scene
         bpy.context.scene.collection.objects.link(armature)
         armature_object = armature
         armature_object.select_set(True)
@@ -86,7 +86,7 @@ class ModelSet(Node):
         # Add bones
         bones = self.root_joint.buildBoneHierarchy(builder, None, None, armature_data)
 
-        bpy.ops.object.mode_set(mode = 'POSE')
+        bpy.ops.object.mode_set(mode='POSE')
 
         # Add meshes
         self.addGeometry(builder, armature, bones)
@@ -95,13 +95,13 @@ class ModelSet(Node):
         self.addInstances(builder, armature, bones)
 
         bpy.context.view_layer.update()
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         return armature
 
     def translate_coordinate_system(self, obj):
-        #correct orientation due to coordinate system differences
-        obj.matrix_basis @= Matrix.Rotation(math.pi / 2, 4, [1.0,0.0,0.0])
+        # correct orientation due to coordinate system differences
+        obj.matrix_basis @= Matrix.Rotation(math.pi / 2, 4, [1.0, 0.0, 0.0])
 
     def addGeometry(self, builder, armature, bones):
         for bone in bones:
@@ -145,21 +145,21 @@ class ModelSet(Node):
                 bone_length = length_robj.property.length
                 pole_angle = length_robj.property.pole_angle
 
-                #This is a hack needed due to how the IK systems differ
-                #May break on models using a different exporter than the one used for XD/Colosseum
-                #(Or just some inconveniently placed children)
+                # This is a hack needed due to how the IK systems differ
+                # May break on models using a different exporter than the one used for XD/Colosseum
+                # (Or just some inconveniently placed children)
                 effector = armature.data.bones[hsd_joint.temp_name]
                 effector_pos = Vector(effector.matrix_local.translation)
                 effector_name = effector.name
                 bpy.context.view_layer.objects.active = armature
-                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.object.mode_set(mode='EDIT')
                 position = Vector(effector.parent.matrix_local.translation)
                 direction = Vector(effector.parent.matrix_local.col[0][0:3]).normalized()
                 direction *= bone_length * effector.parent.matrix_local.to_scale()[0]
                 position += direction
-                #XXX contrary to documentation, .translate() doesn't seem to exist on EditBones in 2.81
-                #Swap this back when this gets fixed
-                #armature.data.edit_bones[effector_name].translate(position - effector_pos)
+                # XXX contrary to documentation, .translate() doesn't seem to exist on EditBones in 2.81
+                # Swap this back when this gets fixed
+                # armature.data.edit_bones[effector_name].translate(position - effector_pos)
                 headpos = Vector(armature.data.edit_bones[effector_name].head[:]) + (position - effector_pos)
                 armature.data.edit_bones[effector_name].head[:] = headpos[:]
                 tailpos = Vector(armature.data.edit_bones[effector_name].tail[:]) + (position - effector_pos)
@@ -174,11 +174,11 @@ class ModelSet(Node):
                         true_effector = child
                         distance = l
                 """
-                bpy.ops.object.mode_set(mode = 'POSE')
-                #if hsd_joint.temp_parent.flags & hsd.JOBJ_SKELETON:
-                #adding the constraint
+                bpy.ops.object.mode_set(mode='POSE')
+                # if hsd_joint.temp_parent.flags & hsd.JOBJ_SKELETON:
+                # adding the constraint
 
-                c = armature.pose.bones[effector_name].constraints.new(type = 'IK')
+                c = armature.pose.bones[effector_name].constraints.new(type='IK')
                 c.chain_count = chain_length
                 if target_robj:
                     c.target = armature
@@ -187,9 +187,9 @@ class ModelSet(Node):
                         c.pole_target = armature
                         c.pole_subtarget = poletarget_robj.property.temp_name
                         c.pole_angle = pole_angle
-                #else:
+                # else:
                 #    notice_output("No Pos constraint RObj on IK Effector")
-                #else:
+                # else:
                 #    notice_output("Adding IK contraint to Bone without Bone parents has no effect")
 
     def addInstances(self, builder, armature, bones):
@@ -204,17 +204,10 @@ class ModelSet(Node):
                         blender_mesh = pobj.blender_mesh
                         copy = mesh.copy()
                         copy.parent = armature
-                        #copy.parent_bone = bone.temp_name
-                        #correct_coordinate_orientation(copy)
+                        # copy.parent_bone = bone.temp_name
+                        # correct_coordinate_orientation(copy)
                         copy.matrix_local = bone.temp_matrix
                         bpy.context.scene.collection.objects.link(copy)
 
                         pobj = pobj.next
                     mesh = mesh.next
-
-
-
-
-
-
-

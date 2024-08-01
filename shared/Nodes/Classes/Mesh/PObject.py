@@ -13,7 +13,6 @@ from ....Errors import *
 
 # PObject
 class PObject(Node):
-    class_name = "P Object"
     fields = [
         ('name', 'string'),
         ('next', 'PObject'),

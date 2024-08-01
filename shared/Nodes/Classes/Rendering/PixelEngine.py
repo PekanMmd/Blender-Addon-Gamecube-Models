@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Pixel Engine (aka PE)
 class PixelEngine(Node):
-    class_name = "Pixel Engine"
     fields = [
         ('flags', 'uchar'),
         ('reference_0', 'uchar'),

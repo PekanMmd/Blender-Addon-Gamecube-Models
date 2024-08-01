@@ -1,9 +1,9 @@
 from ...Node import Node
 from ....Errors import *
 
+
 # Shape Set
 class ShapeSet(Node):
-    class_name = "Shape Set"
     fields = [
         ('flags', 'ushort'),
         ('shape_count', 'ushort'),
@@ -23,14 +23,14 @@ class ShapeSet(Node):
         vertex_format_size = parser.getTypeLength(vertex_format)
         vertex_index_format = self.vertex.getFormat()
         vertex_index_format_size = parser.getTypeLength(vertex_index_format)
-        vertex_set_type = '((*((@'+ vertex_index_format + ')[vertex_tri_count]))[shape_count])'
+        vertex_set_type = '((*((@' + vertex_index_format + ')[vertex_tri_count]))[shape_count])'
         vertex_set = parser.read(vertex_set_type, self.vertex_set)
 
         normal_format = self.normal.getDirectElementType()
         normal_format_size = parser.getTypeLength(normal_format)
         normal_index_format = self.normal.getFormat()
         normal_index_format_size = parser.getTypeLength(normal_index_format)
-        normal_set_type = '((*((@'+ normal_index_format + ')[normal_tri_count]))[shape_count])'
+        normal_set_type = '((*((@' + normal_index_format + ')[normal_tri_count]))[shape_count])'
         self.normal_set = parser.read(normal_set_type, self.normal_set)
 
         self.vertex_set = []
@@ -38,7 +38,7 @@ class ShapeSet(Node):
             vertex_list = []
 
             for tri_index in range(self.vertex_tri_count):
-                #Dunno if this works for meshes with normalized vertex indices
+                # Dunno if this works for meshes with normalized vertex indices
                 index = vertex_set[shape_index][tri_index]
                 position = self.vertex.stride * index
                 value = parser.read(vertex_format, self.vertex.base_pointer, position)

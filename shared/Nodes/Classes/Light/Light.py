@@ -1,9 +1,10 @@
 from ...Node import Node
 from ....Constants import *
+from . import Attn, PointLight, SpotLight
+
 
 # Light
 class Light(Node):
-    class_name = "Light"
     fields = [
         ('name', 'string'),
         ('link', 'Light'),
@@ -27,7 +28,7 @@ class Light(Node):
                 self.property = parser.read('PointLight', self.property)
             elif self.flags == LOBJ_SPOT:
                 self.property = parser.read('SpotLight', self.property)
-            else: # LOBJ_AMBIENT
+            else:  # LOBJ_AMBIENT
                 self.property = None
 
     def writeBinary(self, builder):
@@ -41,12 +42,12 @@ class Light(Node):
             self.attn_flags = 0
             self.property = self.property.address
 
-        elif isinstance(self.property, PointLight):
+        elif isinstance(self.property, PointLight.PointLight):
             self.flags = LOBJ_POINT
             self.attn_flags = 0
             self.property = self.property.address
 
-        elif isinstance(self.property, SpotLight):
+        elif isinstance(self.property, SpotLight.SpotLight):
             self.flags = LOBJ_SPOT
             self.attn_flags = 0
             self.property = self.property.address
@@ -57,4 +58,3 @@ class Light(Node):
             self.property = 0
 
         super().writeBinary(builder)
-

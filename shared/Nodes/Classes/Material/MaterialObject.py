@@ -5,9 +5,9 @@ from ...Node import Node
 from ....Errors import *
 from ....Constants import *
 
+
 # Material Object
 class MaterialObject(Node):
-    class_name = "Material Object"
     fields = [
         ('class_type', 'string'),
         ('render_mode', 'uint'),
@@ -53,7 +53,7 @@ class MaterialObject(Node):
         diffuse_flags = self.render_mode & RENDER_DIFFUSE_BITS
         if diffuse_flags == RENDER_DIFFUSE_MAT0:
             diffuse_flags = RENDER_DIFFUSE_MAT
-        
+
         alpha_flags = self.render_mode & RENDER_ALPHA_BITS
         if alpha_flags == RENDER_ALPHA_COMPAT:
             alpha_flags = diffuse_flags << RENDER_ALPHA_SHIFT
@@ -61,7 +61,7 @@ class MaterialObject(Node):
         if self.render_mode & RENDER_DIFFUSE:
             color = nodes.new('ShaderNodeRGB')
             if diffuse_flags == RENDER_DIFFUSE_VTX:
-                color.outputs[0].default_value[:] = [1,1,1,1]
+                color.outputs[0].default_value[:] = [1, 1, 1, 1]
             else:
                 color.outputs[0].default_value[:] = diffuse_color
 
@@ -111,10 +111,9 @@ class MaterialObject(Node):
                     links.new(material_alpha.outputs[0], mix.inputs[1])
                     alpha = mix
 
-
         last_color = color.outputs[0]
         last_alpha = alpha.outputs[0]
-        bump_map  = None
+        bump_map = None
 
         for texture in textures:
             if (texture.flags & TEX_COORD_MASK) == TEX_COORD_UV:
@@ -129,16 +128,16 @@ class MaterialObject(Node):
 
             mapping = nodes.new('ShaderNodeMapping')
             mapping.vector_type = 'TEXTURE'
-            mapping.inputs[1].default_value = texture.translation 
-            mapping.inputs[2].default_value = texture.rotation 
-            mapping.inputs[3].default_value = texture.scale 
+            mapping.inputs[1].default_value = texture.translation
+            mapping.inputs[2].default_value = texture.rotation
+            mapping.inputs[3].default_value = texture.scale
 
             # Blender UV coordinates are relative to the bottom left so we need to account for that
             mapping.inputs[1].default_value[1] = 1 - (texture.scale[1] * (texture.translation[1] + 1))
 
-            #TODO: Is this correct?
+            # TODO: Is this correct?
             if (texture.flags & TEX_COORD_MASK) == TEX_COORD_REFLECTION:
-                mapping.inputs[2].default_value[0] -= math.pi/2
+                mapping.inputs[2].default_value[0] -= math.pi / 2
 
             blender_texture = nodes.new('ShaderNodeTexImage')
             blender_texture.image = texture.image_data
@@ -157,7 +156,7 @@ class MaterialObject(Node):
 
             cur_color = blender_texture.outputs[0]
             cur_alpha = blender_texture.outputs[1]
-            
+
             if texture.tev:
                 tev = texture.tev
                 if tev.active & TOBJ_TEVREG_ACTIVE_COLOR_TEV:
@@ -189,9 +188,9 @@ class MaterialObject(Node):
                         mix = nodes.new('ShaderNodeMixRGB')
                         mix.blend_type = self.blender_colormap_ops_by_hsd_op[colormap]
                         mix.inputs[0].default_value = 1
-                        
+
                         mix.name = self.blender_colormap_names_by_hsd_op[colormap] + ' ' + str(texture.blending)
-                        
+
                         if not colormap == TEX_COLORMAP_REPLACE:
                             links.new(last_color, mix.inputs[1])
                             links.new(cur_color, mix.inputs[2])
@@ -206,16 +205,16 @@ class MaterialObject(Node):
                             mix.inputs[0].default_value = 0.0
 
                         last_color = mix.outputs[0]
-                #do alpha
+                # do alpha
                 alphamap = texture.flags & TEX_ALPHAMAP_MASK
                 if not (alphamap == TEX_ALPHAMAP_NONE or
                         alphamap == TEX_ALPHAMAP_PASS):
                     mix = nodes.new('ShaderNodeMixRGB')
                     mix.blend_type = self.blender_alphamap_ops_by_hsd_op[alphamap]
                     mix.inputs[0].default_value = 1
-                    
+
                     mix.name = self.blender_alphamap_names_by_hsd_op[alphamap]
-                    
+
                     if not alphamap == TEX_ALPHAMAP_REPLACE:
                         links.new(last_alpha, mix.inputs[1])
                         links.new(cur_alpha, mix.inputs[2])
@@ -243,19 +242,19 @@ class MaterialObject(Node):
             #         (GXBlendFactor) pixel_engine_data->destination_factor,
             #         (GXLogicOp) pixel_engine_data->logic_op);
             if pixel_engine_data.type == GX_BM_NONE:
-                pass #source data just overwrites EFB data (Opaque)
+                pass  # source data just overwrites EFB data (Opaque)
 
             elif pixel_engine_data.type == GX_BM_BLEND:
                 # dst_pix_clr = src_pix_clr * source_factor + dst_pix_clr * destination_factor
                 if pixel_engine_data.destination_factor == GX_BL_ZERO:
                     # Destination is completely overwritten
                     if pixel_engine_data.source_factor == GX_BL_ONE:
-                        pass # Same as GX_BM_NONE
+                        pass  # Same as GX_BM_NONE
 
                     elif pixel_engine_data.source_factor == GX_BL_ZERO:
                         # Destination is set to 0
                         black = nodes.new('ShaderNodeRGB')
-                        black.outputs[0].default_value[:] = [0,0,0,1]
+                        black.outputs[0].default_value[:] = [0, 0, 0, 1]
                         last_color = black.outputs[0]
 
                     elif pixel_engine_data.source_factor == GX_BL_DSTCLR:
@@ -267,7 +266,7 @@ class MaterialObject(Node):
                         # Blend with black by alpha
                         blend = nodes.new('ShaderNodeMixRGB')
                         links.new(last_alpha, blend.inputs[0])
-                        blend.inputs[1].default_value = [0,0,0,0xFF]
+                        blend.inputs[1].default_value = [0, 0, 0, 0xFF]
                         links.new(last_color, blend.inputs[2])
                         last_color = blend.outputs[0]
 
@@ -275,7 +274,7 @@ class MaterialObject(Node):
                         # Same as above with inverted alpha
                         blend = nodes.new('ShaderNodeMixRGB')
                         links.new(last_alpha, blend.inputs[0])
-                        blend.inputs[2].default_value = [0,0,0,0xFF]
+                        blend.inputs[2].default_value = [0, 0, 0, 0xFF]
                         links.new(last_color, blend.inputs[1])
                         last_color = blend.outputs[0]
 
@@ -305,7 +304,7 @@ class MaterialObject(Node):
                         # Manually blend color
                         blend = nodes.new('ShaderNodeMixRGB')
                         links.new(last_alpha, blend.inputs[0])
-                        blend.inputs[1].default_value = [0,0,0,0xFF]
+                        blend.inputs[1].default_value = [0, 0, 0, 0xFF]
                         links.new(last_color, blend.inputs[2])
                         last_color = blend.outputs[0]
 
@@ -317,7 +316,7 @@ class MaterialObject(Node):
                         # Manually blend color
                         blend = nodes.new('ShaderNodeMixRGB')
                         links.new(last_alpha, blend.inputs[0])
-                        blend.inputs[2].default_value = [0,0,0,0xFF]
+                        blend.inputs[2].default_value = [0, 0, 0, 0xFF]
                         links.new(last_color, blend.inputs[1])
                         last_color = blend.outputs[0]
 
@@ -325,13 +324,15 @@ class MaterialObject(Node):
                         # Can't be properly approximated with Eevee or Cycles
                         pass
 
-                elif (pixel_engine_data.destination_factor == GX_BL_INVSRCALPHA and pixel_engine_data.source_factor == GX_BL_SRCALPHA):
+                elif (
+                        pixel_engine_data.destination_factor == GX_BL_INVSRCALPHA and pixel_engine_data.source_factor == GX_BL_SRCALPHA):
                     # Alpha Blend
                     transparent_shader = True
                     blender_material.blend_method = 'HASHED'
 
-                elif (pixel_engine_data.destination_factor == GX_BL_SRCALPHA and pixel_engine_data.source_factor == GX_BL_INVSRCALPHA):
-                    #Inverse Alpha Blend
+                elif (
+                        pixel_engine_data.destination_factor == GX_BL_SRCALPHA and pixel_engine_data.source_factor == GX_BL_INVSRCALPHA):
+                    # Inverse Alpha Blend
                     transparent_shader = True
                     blender_material.blend_method = 'HASHED'
                     factor = nodes.new('ShaderNodeMath')
@@ -349,17 +350,17 @@ class MaterialObject(Node):
                 if pixel_engine_data.logic_op == GX_LO_CLEAR:
                     # Destination is set to 0
                     black = nodes.new('ShaderNodeRGB')
-                    black.outputs[0].default_value[:] = [0,0,0,1]
+                    black.outputs[0].default_value[:] = [0, 0, 0, 1]
                     last_color = black.outputs[0]
 
                 elif pixel_engine_data.logic_op == GX_LO_SET:
                     # Destination is set to 1
                     white = nodes.new('ShaderNodeRGB')
-                    white.outputs[0].default_value[:] = [1,1,1,1]
+                    white.outputs[0].default_value[:] = [1, 1, 1, 1]
                     last_color = white.outputs[0]
 
                 elif pixel_engine_data.logic_op == GX_LO_COPY:
-                    pass # same as GX_BM_NONE ?
+                    pass  # same as GX_BM_NONE ?
 
                 elif pixel_engine_data.logic_op == GX_LO_INVCOPY:
                     # Invert color ?
@@ -380,7 +381,7 @@ class MaterialObject(Node):
                     pass
 
             elif pixel_engine_data.type == GX_BM_SUBTRACT:
-                pass #not doable right now
+                pass  # not doable right now
 
             else:
                 raise PixelEngineUnknownBlendModeError(pixel_engine_data.type)
@@ -408,11 +409,11 @@ class MaterialObject(Node):
         # Alpha
         if transparent_shader:
             #
-            #alpha_factor = nodes.new('ShaderNodeMath')
-            #alpha_factor.operation = 'POWER'
-            #alpha_factor.inputs[1].default_value = 3
-            #links.new(last_alpha, alpha_factor.inputs[0])
-            #last_alpha = alpha_factor.outputs[0]
+            # alpha_factor = nodes.new('ShaderNodeMath')
+            # alpha_factor.operation = 'POWER'
+            # alpha_factor.inputs[1].default_value = 3
+            # links.new(last_alpha, alpha_factor.inputs[0])
+            # last_alpha = alpha_factor.outputs[0]
             #
             links.new(last_alpha, shader.inputs[18])
 
@@ -471,23 +472,23 @@ class MaterialObject(Node):
             elif flag == gx.GX_CC_TEXA:
                 return texture.outputs[1]
             elif flag == hsd.TOBJ_TEV_CC_KONST_RGB:
-                color.outputs[0].default_value = [tev.konst.red, tev.konst.green,tev.konst.blue,tev.konst.alpha]
+                color.outputs[0].default_value = [tev.konst.red, tev.konst.green, tev.konst.blue, tev.konst.alpha]
             elif flag == hsd.TOBJ_TEV_CC_KONST_RRR:
-                color.outputs[0].default_value = [tev.konst.red, tev.konst.red,tev.konst.red,tev.konst.alpha]
+                color.outputs[0].default_value = [tev.konst.red, tev.konst.red, tev.konst.red, tev.konst.alpha]
             elif flag == hsd.TOBJ_TEV_CC_KONST_GGG:
-                color.outputs[0].default_value = [tev.konst.green, tev.konst.green,tev.konst.green,tev.konst.alpha]
+                color.outputs[0].default_value = [tev.konst.green, tev.konst.green, tev.konst.green, tev.konst.alpha]
             elif flag == hsd.TOBJ_TEV_CC_KONST_BBB:
-                color.outputs[0].default_value = [tev.konst.blue, tev.konst.blue,tev.konst.blue,tev.konst.alpha]
+                color.outputs[0].default_value = [tev.konst.blue, tev.konst.blue, tev.konst.blue, tev.konst.alpha]
             elif flag == hsd.TOBJ_TEV_CC_KONST_AAA:
-                color.outputs[0].default_value = [tev.konst.alpha, tev.konst.alpha,tev.konst.alpha,tev.konst.alpha]
+                color.outputs[0].default_value = [tev.konst.alpha, tev.konst.alpha, tev.konst.alpha, tev.konst.alpha]
             elif flag == hsd.TOBJ_TEV_CC_TEX0_RGB:
-                color.outputs[0].default_value = [tev.tev0.red, tev.tev0.green,tev.tev0.blue,tev.tev0.alpha]
+                color.outputs[0].default_value = [tev.tev0.red, tev.tev0.green, tev.tev0.blue, tev.tev0.alpha]
             elif flag == hsd.TOBJ_TEV_CC_TEX0_AAA:
-                color.outputs[0].default_value = [tev.tev0.alpha, tev.tev0.alpha,tev.tev0.alpha,tev.tev0.alpha]
+                color.outputs[0].default_value = [tev.tev0.alpha, tev.tev0.alpha, tev.tev0.alpha, tev.tev0.alpha]
             elif flag == hsd.TOBJ_TEV_CC_TEX1_RGB:
-                color.outputs[0].default_value = [tev.tev1.red, tev.tev1.green,tev.tev1.blue,tev.tev1.alpha]
+                color.outputs[0].default_value = [tev.tev1.red, tev.tev1.green, tev.tev1.blue, tev.tev1.alpha]
             elif flag == hsd.TOBJ_TEV_CC_TEX1_AAA:
-                color.outputs[0].default_value = [tev.tev1.alpha, tev.tev1.alpha,tev.tev1.alpha,tev.tev1.alpha]
+                color.outputs[0].default_value = [tev.tev1.alpha, tev.tev1.alpha, tev.tev1.alpha, tev.tev1.alpha]
             else:
                 error_output("unknown tev color input: 0x%X" % flag)
                 return texture.outputs[0]
@@ -592,7 +593,7 @@ class MaterialObject(Node):
             sub0 = nodes.new('ShaderNodeMixRGB')
             sub0.inputs[0].default_value = 1
             sub0.blend_type = 'SUBTRACT'
-            sub0.inputs[1].default_value = [1,1,1,1]
+            sub0.inputs[1].default_value = [1, 1, 1, 1]
             links.new(inputs[2], sub0.inputs[2])
 
             mul0 = nodes.new('ShaderNodeMixRGB')
@@ -614,7 +615,7 @@ class MaterialObject(Node):
             links.new(mul0.outputs[0], add0.inputs[2])
 
             if tev.color_op == gx.GX_TEV_ADD:
-                #OUT = [3] + ((1.0 - [2])*[0] + [2]*[1])
+                # OUT = [3] + ((1.0 - [2])*[0] + [2]*[1])
 
                 add1 = nodes.new('ShaderNodeMixRGB')
                 add1.inputs[0].default_value = 1
@@ -623,8 +624,8 @@ class MaterialObject(Node):
                 links.new(add0.outputs[0], add1.inputs[2])
 
                 return add1.outputs[0]
-            else: # GX_TEV_SUB
-                #OUT = [3] - ((1.0 - [2])*[0] + [2]*[1])
+            else:  # GX_TEV_SUB
+                # OUT = [3] - ((1.0 - [2])*[0] + [2]*[1])
 
                 sub1 = nodes.new('ShaderNodeMixRGB')
                 sub1.inputs[0].default_value = 1
@@ -656,7 +657,7 @@ class MaterialObject(Node):
             links.new(mul0.outputs[0], add0.inputs[2])
 
             if tev.alpha_op == gx.GX_TEV_ADD:
-                #OUT = [3] + ((1.0 - [2])*[0] + [2]*[1])
+                # OUT = [3] + ((1.0 - [2])*[0] + [2]*[1])
 
                 add1 = nodes.new('ShaderNodeMath')
                 add1.operation = 'ADD'
@@ -664,8 +665,8 @@ class MaterialObject(Node):
                 links.new(add0.outputs[0], add1.inputs[2])
 
                 return add1.outputs[0]
-            else: # GX_TEV_SUB
-                #OUT = [3] - ((1.0 - [2])*[0] + [2]*[1])
+            else:  # GX_TEV_SUB
+                # OUT = [3] - ((1.0 - [2])*[0] + [2]*[1])
 
                 sub1 = nodes.new('ShaderNodeMath')
                 sub1.operation = 'SUBTRACT'
@@ -673,7 +674,6 @@ class MaterialObject(Node):
                 links.new(add0.outputs[0], sub1.inputs[2])
 
                 return sub1.outputs[0]
-
 
     def make_tev_op_comp(self, nodes, links, inputs, tev, iscolor):
         return inputs[0]
@@ -784,13 +784,13 @@ class MaterialObject(Node):
     }
 
     blender_colormap_ops_by_hsd_op = {
-        TEX_COLORMAP_ALPHA_MASK : 'MIX',
-        TEX_COLORMAP_RGB_MASK   : 'MIX',
-        TEX_COLORMAP_BLEND      : 'MIX',
-        TEX_COLORMAP_MODULATE   : 'MULTIPLY',
-        TEX_COLORMAP_REPLACE    : 'ADD',
-        TEX_COLORMAP_ADD        : 'ADD',
-        TEX_COLORMAP_SUB        : 'SUBTRACT',
+        TEX_COLORMAP_ALPHA_MASK: 'MIX',
+        TEX_COLORMAP_RGB_MASK: 'MIX',
+        TEX_COLORMAP_BLEND: 'MIX',
+        TEX_COLORMAP_MODULATE: 'MULTIPLY',
+        TEX_COLORMAP_REPLACE: 'ADD',
+        TEX_COLORMAP_ADD: 'ADD',
+        TEX_COLORMAP_SUB: 'SUBTRACT',
     }
 
     blender_colormap_names_by_hsd_op = {
@@ -806,12 +806,12 @@ class MaterialObject(Node):
     }
 
     blender_alphamap_ops_by_hsd_op = {
-        TEX_ALPHAMAP_ALPHA_MASK : 'MIX',
-        TEX_ALPHAMAP_BLEND      : 'MIX',
-        TEX_ALPHAMAP_MODULATE   : 'MULTIPLY',
-        TEX_ALPHAMAP_REPLACE    : 'ADD',
-        TEX_ALPHAMAP_ADD        : 'ADD',
-        TEX_ALPHAMAP_SUB        : 'SUBTRACT',
+        TEX_ALPHAMAP_ALPHA_MASK: 'MIX',
+        TEX_ALPHAMAP_BLEND: 'MIX',
+        TEX_ALPHAMAP_MODULATE: 'MULTIPLY',
+        TEX_ALPHAMAP_REPLACE: 'ADD',
+        TEX_ALPHAMAP_ADD: 'ADD',
+        TEX_ALPHAMAP_SUB: 'SUBTRACT',
     }
 
     blender_alphamap_names_by_hsd_op = {

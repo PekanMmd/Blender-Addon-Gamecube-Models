@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Texture Animation
 class TextureAnimation(Node):
-    class_name = "Texture Animation"
     fields = [
         ('next', 'TextureAnimation'),
         ('id', 'uint'),

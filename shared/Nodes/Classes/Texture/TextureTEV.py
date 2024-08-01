@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Texture TEV
 class TextureTEV(Node):
-    class_name = "Texture TEV"
     fields = [
         ('color_op', 'uchar'),
         ('alpha_op', 'uchar'),

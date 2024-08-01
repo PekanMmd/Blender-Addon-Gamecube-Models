@@ -4,10 +4,12 @@ from mathutils import Matrix, Euler, Vector
 
 from ...Node import Node
 from ....Constants import *
+from ..Rendering.Particle import Particle
+from ..Misc.Spline import Spline
+
 
 # Joint (aka Bone)
 class Joint(Node):
-    class_name = "Joint"
     isHidden = False
     fields = [
         ('name', 'string'),
@@ -63,27 +65,27 @@ class Joint(Node):
     def buildBoneHierarchy(self, builder, parent, hsd_parent, armature_data):
         bones = []
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         name = 'Bone_' + str(builder.bone_count)
         builder.bone_count += 1
 
-        bone = armature_data.edit_bones.new(name = name)
+        bone = armature_data.edit_bones.new(name=name)
         if builder.options.get("ik_hack"):
             bone.tail = Vector((0.0, 1e-3, 0.0))
         else:
             bone.tail = Vector((0.0, 1.0, 0.0))
 
-        scale_x = Matrix.Scale(self.scale[0], 4, [1.0,0.0,0.0])
-        scale_y = Matrix.Scale(self.scale[1], 4, [0.0,1.0,0.0])
-        scale_z = Matrix.Scale(self.scale[2], 4, [0.0,0.0,1.0])
+        scale_x = Matrix.Scale(self.scale[0], 4, [1.0, 0.0, 0.0])
+        scale_y = Matrix.Scale(self.scale[1], 4, [0.0, 1.0, 0.0])
+        scale_z = Matrix.Scale(self.scale[2], 4, [0.0, 0.0, 1.0])
         rotation_x = Matrix.Rotation(self.rotation[0], 4, 'X')
         rotation_y = Matrix.Rotation(self.rotation[1], 4, 'Y')
         rotation_z = Matrix.Rotation(self.rotation[2], 4, 'Z')
         translation = Matrix.Translation(Vector(self.position))
         # Parent * T * R * S
-        #bone_matrix = translation * rotation_z * rotation_y * rotation_x * scale_z * scale_y * scale_x
+        # bone_matrix = translation * rotation_z * rotation_y * rotation_x * scale_z * scale_y * scale_x
         bone_matrix = self.compileSRTMatrix(self.scale, self.rotation, self.position)
-        #bone_matrix = Matrix()
+        # bone_matrix = Matrix()
         self.temp_matrix_local = bone_matrix
         if parent:
             bone_matrix = hsd_parent.temp_matrix @ bone_matrix
@@ -93,7 +95,7 @@ class Joint(Node):
         self.temp_name = bone.name
         self.temp_parent = hsd_parent
 
-        #bone.use_relative_parent = True
+        # bone.use_relative_parent = True
         if self.child and not self.flags & JOBJ_INSTANCE:
             bones += self.child.buildBoneHierarchy(builder, bone, self, armature_data)
         if self.next:
@@ -103,15 +105,14 @@ class Joint(Node):
         return bones
 
     def compileSRTMatrix(self, scale, rotation, position):
-        scale_x = Matrix.Scale(scale[0], 4, [1.0,0.0,0.0])
-        scale_y = Matrix.Scale(scale[1], 4, [0.0,1.0,0.0])
-        scale_z = Matrix.Scale(scale[2], 4, [0.0,0.0,1.0])
+        scale_x = Matrix.Scale(scale[0], 4, [1.0, 0.0, 0.0])
+        scale_y = Matrix.Scale(scale[1], 4, [0.0, 1.0, 0.0])
+        scale_z = Matrix.Scale(scale[2], 4, [0.0, 0.0, 1.0])
         rotation_x = Matrix.Rotation(rotation[0], 4, 'X')
         rotation_y = Matrix.Rotation(rotation[1], 4, 'Y')
         rotation_z = Matrix.Rotation(rotation[2], 4, 'Z')
         translation = Matrix.Translation(Vector(position))
         return translation @ rotation_z @ rotation_y @ rotation_x @ scale_z @ scale_y @ scale_x
-
 
     def getReferenceObject(self, type, sub_type):
         reference = self.reference
@@ -121,8 +122,3 @@ class Joint(Node):
             reference = reference.next
 
         return None
-
-
-
-
-

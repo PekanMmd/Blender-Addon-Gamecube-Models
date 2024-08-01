@@ -1,5 +1,6 @@
 from .Node import Node
 
+
 # Dummy Node
 class Dummy(Node):
     class_name = "Dummy"

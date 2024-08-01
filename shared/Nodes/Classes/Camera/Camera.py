@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Camera
 class Camera(Node):
-    class_name = "Camera"
     fields = [
         ('name', 'string'),
         ('flags', 'ushort'),

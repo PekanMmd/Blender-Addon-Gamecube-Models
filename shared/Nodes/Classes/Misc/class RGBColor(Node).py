@@ -1,9 +1,9 @@
 from ...Node import Node
-from .Color import Color
+from ..Colors import Color
+
 
 # RGB Color
 class RGBColor(Node, Color):
-    class_name = "RGB Color"
     is_cachable = False
     fields = [
         ('red', 'uchar'),

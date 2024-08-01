@@ -1,15 +1,15 @@
 from ...Node import Node
 from ...Dummy import Dummy
 
+
 # Section Info
 class SectionInfo(Node):
-    class_name = "Section"
 
     length = 8
     is_in_data_section = False
 
     fields = [
-        ("root_node", "uint"), # the type of node to parse depends on the section name
+        ("root_node", "uint"),  # the type of node to parse depends on the section name
         ("section_name", "uint")
     ]
 
@@ -41,7 +41,5 @@ class SectionInfo(Node):
             dummy = Dummy(self.root_node, None)
             dummy.class_name = "Unrecognised root node at section_name: " + self.section_name
             self.root_node = dummy
-            
+
         # TODO: parse any other section types that may be present in other games
-
-

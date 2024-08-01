@@ -2,9 +2,9 @@ from ...Node import Node
 from ....Constants import *
 from .Image import *
 
+
 # Palette (aka Texture Lookup Table, aka TLUT)
 class Palette(Node):
-    class_name = "Palette"
     fields = [
         ('data', 'uint'),
         ('format', 'uint'),
@@ -30,9 +30,10 @@ class Palette(Node):
 
         self.data = data
 
+
 palette_format_dict = {
     #                 bits per pixel | type
-    0:    (BITSPPX_IA8   ,  'IA8Color'   ),
-    1:    (BITSPPX_RGB565,  'RGB565Color'),
-    2:    (BITSPPX_RGB5A3,  'RGB5A3Color'),
+    0: (BITSPPX_IA8, 'IA8Color'),
+    1: (BITSPPX_RGB565, 'RGB565Color'),
+    2: (BITSPPX_RGB5A3, 'RGB5A3Color'),
 }

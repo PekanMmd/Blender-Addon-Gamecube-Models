@@ -4,9 +4,9 @@ from ....Constants import *
 from ....Errors import *
 from ..Colors import *
 
+
 # Vertex (aka vtxdesc)
 class Vertex(Node):
-    class_name = "Vertex"
     is_cachable = False
     fields = [
         ('attribute', 'uint'),
@@ -41,7 +41,7 @@ class Vertex(Node):
             return 'uchar'
         type = ''
         if (self.attribute == GX_VA_CLR0 or
-            self.attribute == GX_VA_CLR1):
+                self.attribute == GX_VA_CLR1):
             if self.component_type == GX_RGBA8:
                 return 'RGBAColor'
             elif self.component_type == GX_RGBA6:
@@ -99,10 +99,10 @@ class Vertex(Node):
 
     def isTexture(self):
         return (self.attribute == GX_VA_TEX0 or
-            self.attribute == GX_VA_TEX1 or
-            self.attribute == GX_VA_TEX2 or
-            self.attribute == GX_VA_TEX3 or
-            self.attribute == GX_VA_TEX4 or
-            self.attribute == GX_VA_TEX5 or
-            self.attribute == GX_VA_TEX6 or
-            self.attribute == GX_VA_TEX7)
+                self.attribute == GX_VA_TEX1 or
+                self.attribute == GX_VA_TEX2 or
+                self.attribute == GX_VA_TEX3 or
+                self.attribute == GX_VA_TEX4 or
+                self.attribute == GX_VA_TEX5 or
+                self.attribute == GX_VA_TEX6 or
+                self.attribute == GX_VA_TEX7)

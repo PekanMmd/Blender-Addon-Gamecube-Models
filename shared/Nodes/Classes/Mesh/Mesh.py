@@ -4,9 +4,9 @@ from mathutils import Matrix, Euler, Vector
 from ...Node import Node
 from ....Constants import *
 
+
 # Mesh (aka DObject)
 class Mesh(Node):
-    class_name = "Mesh"
     fields = [
         ('name', 'string'),
         ('next', 'Mesh'),
@@ -43,15 +43,15 @@ class Mesh(Node):
             pobj = pobj.next
 
     def apply_bone_weights(self, mesh, hsd_mesh, hsd_bone, armature):
-        #apply weights now that the bones actually exist
+        # apply weights now that the bones actually exist
 
         bpy.context.view_layer.objects.active = mesh
 
-        #TODO: this is inefficient, I should probably sort the vertices by the envelope index beforehand
+        # TODO: this is inefficient, I should probably sort the vertices by the envelope index beforehand
 
         if hsd_mesh.skin[0]:
-            #envelope
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            # envelope
+            bpy.ops.object.mode_set(mode='EDIT')
             joint_groups = {}
             matrices = []
             envelopes = hsd_mesh.skin[1]
@@ -77,7 +77,7 @@ class Mesh(Node):
                     matrix = matrix @ coord
                 matrices.append(matrix)
 
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
             indices = hsd_mesh.skin[0]
             for vertex, index in indices:
@@ -89,7 +89,7 @@ class Mesh(Node):
                 print(matrix)
 
             if hsd_mesh.normals:
-                #XXX: Is this actually needed?
+                # XXX: Is this actually needed?
                 matrix_indices = dict(indices)
                 normal_matrices = []
                 for matrix in matrices:
@@ -99,12 +99,13 @@ class Mesh(Node):
                     normal_matrices.append(normal_matrix.to_4x4())
 
                 for loop in mesh.data.loops:
-                    hsd_mesh.normals[loop.index] = (normal_matrices[matrix_indices[loop.vertex_index]] @ Vector(hsd_mesh.normals[loop.index])).normalized()[:]
+                    hsd_mesh.normals[loop.index] = (normal_matrices[matrix_indices[loop.vertex_index]] @ Vector(
+                        hsd_mesh.normals[loop.index])).normalized()[:]
                 mesh.data.normals_split_custom_set(hsd_mesh.normals)
 
         else:
             if hsd_mesh.skin[1]:
-                #No idea if this is right, don't have any way to test right now
+                # No idea if this is right, don't have any way to test right now
                 matrix = Matrix([[0] * 4] * 4)
                 group0 = mesh.vertex_groups.new(name=hsd_bone.temp_name)
                 matrix += 0.5 * (hsd_bone.temp_matrix @ get_hsd_invbind(hsd_bone))
@@ -124,36 +125,37 @@ class Mesh(Node):
                     mesh.data.normals_split_custom_set(hsd_mesh.normals)
 
             else:
-                mesh.matrix_local = hsd_bone.temp_matrix #* get_hsd_invbind(hsd_bone)
-                #TODO: get matrix relative to parent bone and set parent mode to bone
+                mesh.matrix_local = hsd_bone.temp_matrix  # * get_hsd_invbind(hsd_bone)
+                # TODO: get matrix relative to parent bone and set parent mode to bone
                 group = mesh.vertex_groups.new(name=hsd_bone.temp_name)
                 group.add([v.index for v in mesh.data.vertices], 1.0, 'REPLACE')
                 if hsd_mesh.normals:
                     mesh.data.normals_split_custom_set(hsd_mesh.normals)
-
 
         mod = mesh.modifiers.new('Skinmod', 'ARMATURE')
         mod.object = armature
         mod.use_bone_envelopes = False
         mod.use_vertex_groups = True
 
-#This is needed for correctly applying all this envelope stuff
+
+# This is needed for correctly applying all this envelope stuff
 def envelope_coord_system(hsd_joint):
-    #r: Root
-    #x: First parent bone
-    #m: Referenced joint
-    if hsd_joint.flags & JOBJ_SKELETON_ROOT: # r == x == m
+    # r: Root
+    # x: First parent bone
+    # m: Referenced joint
+    if hsd_joint.flags & JOBJ_SKELETON_ROOT:  # r == x == m
         return None
     else:
-        #find first parent bone
+        # find first parent bone
         hsd_x = find_skeleton(hsd_joint)
         x_inverse = get_hsd_invbind(hsd_joint)
-        if hsd_x.id == hsd_joint.id: # r != x == m
+        if hsd_x.id == hsd_joint.id:  # r != x == m
             return x_inverse.inverted()
-        elif hsd_x.flags & hsd.JOBJ_SKELETON_ROOT: # r == x != m
+        elif hsd_x.flags & hsd.JOBJ_SKELETON_ROOT:  # r == x != m
             return (hsd_x.temp_matrix).inverted() @ hsd_joint.temp_matrix
-        else: # r != x != m
+        else:  # r != x != m
             return (hsd_x.temp_matrix @ x_inverse).inverted() @ hsd_joint.temp_matrix
+
 
 def get_hsd_invbind(hsd_joint):
     if hsd_joint.inverse_bind:
@@ -165,6 +167,7 @@ def get_hsd_invbind(hsd_joint):
             identity = Matrix()
             identity.identity()
             return identity
+
 
 def find_skeleton(hsd_joint):
     while hsd_joint:

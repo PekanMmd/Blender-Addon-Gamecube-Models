@@ -5,50 +5,50 @@ from ..Colors import *
 import array
 import bpy
 
-TILE_S_I4 =       8
-TILE_S_I8 =       8
-TILE_S_IA4 =      8
-TILE_S_IA8 =      4
-TILE_S_RGB565 =   4
-TILE_S_RGB5A3 =   4
-TILE_S_RGBA8 =    4
-TILE_S_CMPR =     8
+TILE_S_I4 = 8
+TILE_S_I8 = 8
+TILE_S_IA4 = 8
+TILE_S_IA8 = 4
+TILE_S_RGB565 = 4
+TILE_S_RGB5A3 = 4
+TILE_S_RGBA8 = 4
+TILE_S_CMPR = 8
 
-TILE_S_C4 =       8
-TILE_S_C8 =       8
-TILE_S_C14X2 =    4
+TILE_S_C4 = 8
+TILE_S_C8 = 8
+TILE_S_C14X2 = 4
 
-TILE_T_I4 =       8
-TILE_T_I8 =       4
-TILE_T_IA4 =      4
-TILE_T_IA8 =      4
-TILE_T_RGB565 =   4
-TILE_T_RGB5A3 =   4
-TILE_T_RGBA8 =    4
-TILE_T_CMPR =     8
+TILE_T_I4 = 8
+TILE_T_I8 = 4
+TILE_T_IA4 = 4
+TILE_T_IA8 = 4
+TILE_T_RGB565 = 4
+TILE_T_RGB5A3 = 4
+TILE_T_RGBA8 = 4
+TILE_T_CMPR = 8
 
-TILE_T_C4 =       8
-TILE_T_C8 =       4
-TILE_T_C14X2 =    4
+TILE_T_C4 = 8
+TILE_T_C8 = 4
+TILE_T_C14X2 = 4
 
-BITSPPX_I4 =      4
-BITSPPX_I8 =      8
-BITSPPX_IA4 =     8
-BITSPPX_IA8 =     16
-BITSPPX_RGB565 =  16
-BITSPPX_RGB5A3 =  16
-BITSPPX_RGBA8 =   32
-BITSPPX_CMPR =    4
+BITSPPX_I4 = 4
+BITSPPX_I8 = 8
+BITSPPX_IA4 = 8
+BITSPPX_IA8 = 16
+BITSPPX_RGB565 = 16
+BITSPPX_RGB5A3 = 16
+BITSPPX_RGBA8 = 32
+BITSPPX_CMPR = 4
 
-BITSPPX_C4 =      4
-BITSPPX_C8 =      8
-BITSPPX_C14X2 =   16
+BITSPPX_C4 = 4
+BITSPPX_C8 = 8
+BITSPPX_C14X2 = 16
 
-CCC = 4 #color component count
+CCC = 4  # color component count
+
 
 # Image
 class Image(Node):
-    class_name = "Image"
     fields = [
         ('data_address', 'uint'),
         ('width', 'ushort'),
@@ -71,7 +71,7 @@ class Image(Node):
         pixels = []
 
         bits_per_pixel, is_indexed, blockWidth, blockHeight, type = format_dict[self.format]
-        blocks_x = (self.width  // blockWidth) + (1 if ((self.width  % blockWidth) > 0) else 0)
+        blocks_x = (self.width // blockWidth) + (1 if ((self.width % blockWidth) > 0) else 0)
         blocks_y = (self.height // blockHeight) + (1 if ((self.height % blockHeight) > 0) else 0)
         bytes_per_pixel = bits_per_pixel >> 3
         pixels_in_image = (blocks_x * blockWidth * blocks_y * blockHeight)
@@ -94,7 +94,7 @@ class Image(Node):
         else:
             if self.format == gx.GX_TF_RGBA8:
                 # rg and ba values of rgba32 are separated within blocks so we'll restructure first
-                pixels_per_block = 16 # 4 pixelsperrow x 4 pixelspercolumn
+                pixels_per_block = 16  # 4 pixelsperrow x 4 pixelspercolumn
                 block_count = pixels_in_image // pixels_per_block
 
                 for i in range(block_count):
@@ -142,7 +142,7 @@ class Image(Node):
 
                             colour3 = Color(r1, g1, b1, 0xFF)
                             colour4 = Color(r2, g2, b2, 0xFF)
-                            
+
                         else:
                             r1 = (colour1.red + colour2.red) // 2
                             g1 = (colour1.green + colour2.green) // 2
@@ -278,9 +278,9 @@ class Image(Node):
         image = bpy.data.images.new(name, self.width, self.height, alpha=True)
         image.pixels = self.pixel_data
 
-        #make sure the image doesn't unload and is stored in .blend files
+        # make sure the image doesn't unload and is stored in .blend files
         image.pack()
-        #setting this before packing erases the image for some reason
+        # setting this before packing erases the image for some reason
         image.alpha_mode = 'CHANNEL_PACKED'
 
         # blender won't load the model while this is uncommented but it's useful for testing that textures were generated correctly
@@ -290,34 +290,33 @@ class Image(Node):
 
         return image
 
+
 format_dict = {
     #                 bits per pixel| indexed | tile width   | tile height  | type
-    gx.GX_TF_I4:     (BITSPPX_I4    ,    False, TILE_S_I4    , TILE_T_I4    , None    ),
-    gx.GX_TF_I8:     (BITSPPX_I8    ,    False, TILE_S_I8    , TILE_T_I8    , 'I8Color'    ),
-    gx.GX_TF_IA4:    (BITSPPX_IA4   ,    False, TILE_S_IA4   , TILE_T_IA4   , 'IA4Color'   ),
-    gx.GX_TF_IA8:    (BITSPPX_IA8   ,    False, TILE_S_IA8   , TILE_T_IA8   , 'IA8Color'   ),
-    gx.GX_TF_RGB565: (BITSPPX_RGB565,    False, TILE_S_RGB565, TILE_T_RGB565, 'RGB565Color'),
-    gx.GX_TF_RGB5A3: (BITSPPX_RGB5A3,    False, TILE_S_RGB5A3, TILE_T_RGB5A3, 'RGB5A3Color'),
-    gx.GX_TF_RGBA8:  (BITSPPX_RGBA8 ,    False, TILE_S_RGBA8 , TILE_T_RGBA8 , 'RGBA8Color' ),
-    gx.GX_TF_CMPR:   (BITSPPX_CMPR  ,    False, TILE_S_CMPR  , TILE_T_CMPR  , None  ),
-    #GXCITexFmt
-    gx.GX_TF_C4:     (BITSPPX_C4    ,     True, TILE_S_C4    , TILE_T_C4    , None    ),
-    gx.GX_TF_C8:     (BITSPPX_C8    ,     True, TILE_S_C8    , TILE_T_C8    , 'uchar'    ),
-    gx.GX_TF_C14X2:  (BITSPPX_C14X2 ,     True, TILE_S_C14X2 , TILE_T_C14X2 , 'ushort' ),
+    gx.GX_TF_I4: (BITSPPX_I4, False, TILE_S_I4, TILE_T_I4, None),
+    gx.GX_TF_I8: (BITSPPX_I8, False, TILE_S_I8, TILE_T_I8, 'I8Color'),
+    gx.GX_TF_IA4: (BITSPPX_IA4, False, TILE_S_IA4, TILE_T_IA4, 'IA4Color'),
+    gx.GX_TF_IA8: (BITSPPX_IA8, False, TILE_S_IA8, TILE_T_IA8, 'IA8Color'),
+    gx.GX_TF_RGB565: (BITSPPX_RGB565, False, TILE_S_RGB565, TILE_T_RGB565, 'RGB565Color'),
+    gx.GX_TF_RGB5A3: (BITSPPX_RGB5A3, False, TILE_S_RGB5A3, TILE_T_RGB5A3, 'RGB5A3Color'),
+    gx.GX_TF_RGBA8: (BITSPPX_RGBA8, False, TILE_S_RGBA8, TILE_T_RGBA8, 'RGBA8Color'),
+    gx.GX_TF_CMPR: (BITSPPX_CMPR, False, TILE_S_CMPR, TILE_T_CMPR, None),
+    # GXCITexFmt
+    gx.GX_TF_C4: (BITSPPX_C4, True, TILE_S_C4, TILE_T_C4, None),
+    gx.GX_TF_C8: (BITSPPX_C8, True, TILE_S_C8, TILE_T_C8, 'uchar'),
+    gx.GX_TF_C14X2: (BITSPPX_C14X2, True, TILE_S_C14X2, TILE_T_C14X2, 'ushort'),
 }
 
 name_dict = {
-    gx.GX_TF_I4 : 'I4',
-    gx.GX_TF_I8 : 'I8',
-    gx.GX_TF_IA4 : 'IA4',
-    gx.GX_TF_IA8 : 'IA8',
-    gx.GX_TF_RGB565 : 'RGB565',
-    gx.GX_TF_RGB5A3 : 'RGB5A3',
-    gx.GX_TF_RGBA8 : 'RGBA8',
-    gx.GX_TF_CMPR : 'CMPR',
-    gx.GX_TF_C4 : 'C4',
-    gx.GX_TF_C8 : 'C8',
-    gx.GX_TF_C14X2 : 'C14X2',
+    gx.GX_TF_I4: 'I4',
+    gx.GX_TF_I8: 'I8',
+    gx.GX_TF_IA4: 'IA4',
+    gx.GX_TF_IA8: 'IA8',
+    gx.GX_TF_RGB565: 'RGB565',
+    gx.GX_TF_RGB5A3: 'RGB5A3',
+    gx.GX_TF_RGBA8: 'RGBA8',
+    gx.GX_TF_CMPR: 'CMPR',
+    gx.GX_TF_C4: 'C4',
+    gx.GX_TF_C8: 'C8',
+    gx.GX_TF_C14X2: 'C14X2',
 }
-
-

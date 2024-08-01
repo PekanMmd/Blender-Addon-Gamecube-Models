@@ -11,49 +11,41 @@ bl_info = {
     "warning": "",
     "category": "Import-Export"}
 
-
 if "bpy" in locals():
-    import importlib
+    pass
 
-import os
-import bpy
-from bpy.props import (
-        CollectionProperty,
-        StringProperty,
-        BoolProperty,
-        EnumProperty,
-        FloatProperty,
-        IntProperty,
-)
 from bpy_extras.io_utils import (
-        ImportHelper,
-        ExportHelper,
-        axis_conversion,
+    ImportHelper,
+    ExportHelper,
 )
 
-from .importer import *
 from .exporter import *
+from .importer import *
+
 
 # This class declares global properties which blender uses to add toggles and fields to the file open browser
 # allowing more options to be selected along with the filepath being opened.
 # When a file is selected the execute() function runs.
-class ImportHSD(bpy.types.Operator, ImportHelper):
+class ImportHSD(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
     """Load a DAT model"""
     bl_idname = "import_model.dat"
     bl_label = "Import DAT"
     bl_options = {'UNDO'}
 
     files: bpy.props.CollectionProperty(name="File Path",
-                          description="File path used for importing "
-                                      "the HSD file",
-                          type=bpy.types.OperatorFileListElement)
+                                        description="File path used for importing "
+                                                    "the HSD file",
+                                        type=bpy.types.OperatorFileListElement)
     directory: bpy.props.StringProperty(subtype="DIR_PATH")
-    section: bpy.props.StringProperty(default = '', name = 'Section Name', description = 'Name of the section that should be imported. Leave blank to import all.')
-    ik_hack: bpy.props.BoolProperty(default = True, name = 'IK Hack', description = 'Shrinks Bones down to 1e-3 to make IK work properly.')
-    max_frame: bpy.props.IntProperty(default = 1000, name = 'Max Anim Frame', description = 'Cutoff frame after which animations aren\'t sampled. Use 0 For no limit.')
+    section: bpy.props.StringProperty(default='', name='Section Name',
+                                      description='Name of the section that should be imported. Leave blank to import all.')
+    ik_hack: bpy.props.BoolProperty(default=True, name='IK Hack',
+                                    description='Shrinks Bones down to 1e-3 to make IK work properly.')
+    max_frame: bpy.props.IntProperty(default=1000, name='Max Anim Frame',
+                                     description='Cutoff frame after which animations aren\'t sampled. Use 0 For no limit.')
 
     filename_ext = ".dat"
-    filter_glob = StringProperty(default="*.fdat;*.dat;*.rdat;*.pkx", options={'HIDDEN'})
+    filter_glob = bpy.props.StringProperty(default="*.fdat;*.dat;*.rdat;*.pkx", options={'HIDDEN'})
 
     def execute(self, context):
         if self.files and self.directory:
@@ -98,6 +90,7 @@ classes = (
     ExportHSD,
 )
 
+
 # This function is called when the addon is installed by the user. The classes are registered and added to the blender menus.
 def register():
     for cls in classes:
@@ -106,6 +99,7 @@ def register():
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
+
 # This function is called when the addon is uninstalled by the user. The classes are unregistered and removed from the blender menus.
 def unregister():
     for cls in classes:
@@ -113,6 +107,7 @@ def unregister():
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
 
 # This function is called when the addon is run as a script from within blender's scripting window
 if __name__ == "__main__":

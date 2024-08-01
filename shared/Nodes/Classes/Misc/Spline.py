@@ -1,8 +1,8 @@
 from ...Node import Node
 
+
 # Spline
 class Spline(Node):
-    class_name = "Spline"
     fields = [
         ('flags', 'ushort'),
         ('n', 'ushort'),
@@ -75,7 +75,3 @@ class Spline(Node):
 
         else:
             self.s2 = None
-
-
-
-
