@@ -32,11 +32,10 @@ class Importer:
 		importer_options = {
 			"ik_hack": ik_hack,
 			"verbose": verbose,
-			"print_tree": print_tree
+			"print_tree": print_tree,
+			"max_frame": max_frame if max_frame > 0 else 1000000000,
+			"section_names": [section_name] if len(section_name) > 0 else []
 		}
-
-		importer_options["max_frame"] = max_frame if max_frame > 0 else 1000000000
-		importer_options["section_names"] = [section_name] if len(section_name) > 0 else []
 
 		# Make sure the current selection doesn't mess with anything
 		if bpy.ops.object.select_all.poll():
@@ -50,7 +49,7 @@ class Importer:
 		parser.close()
 
     	# Pass the section objects to the model builder to import them into blender
-		if context != None and len(parser.sections) > 0:
+		if context is not None and len(parser.sections) > 0:
 			builder = ModelBuilder(context, parser.sections, importer_options)
 			try:
 				builder.build()

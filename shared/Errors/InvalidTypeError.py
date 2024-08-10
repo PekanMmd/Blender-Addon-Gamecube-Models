@@ -3,14 +3,14 @@ class InvalidPrimitiveTypeError(Exception):
 		self.type_name = type_name
 
 	def __str__(self):
-		return "Couldn't recognise primitive type with name: " + type_name
+		return "Couldn't recognise primitive type with name: " + self.type_name
 
 class InvalidTypeError(Exception):
 	def __init__(self, type_name):
 		self.type_name = type_name
 
 	def __str__(self):
-		return "Couldn't recognise type with name: " + type_name
+		return "Couldn't recognise type with name: " + self.type_name
 
 class StringTypeLengthError(Exception):
 	def __str__(self):

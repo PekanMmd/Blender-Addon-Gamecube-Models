@@ -1,9 +1,6 @@
 from ..Constants import *
-from .Classes import *
-from .Dummy import *
-from .Node import *
+from ..ClassLookup import get_class_from_name
 
-from ..Constants import *
 
 # define node class as anything unrecognised to allow for unimplemented node classes to be recognised as node classes
 def isNodeClassType(field_type):
@@ -34,8 +31,7 @@ def get_type_length(field_type):
 	elif isBoundedArrayType(field_type):
 		return get_type_length(getArraySubType(field_type)) * getArrayTypeBound(field_type)
 
-	elif isNodeClassType(field_type):
-		class_ref = getClassWithName(field_type)
+	elif (class_ref := get_class_from_name(field_type)) is not None:
 		length = 0
 		for field in class_ref.fields:
 			field_type = markUpFieldType(field[1])
@@ -62,15 +58,15 @@ def get_alignment_at_offset(field_type, offset):
 	elif isBoundedArrayType(field_type):
 		return get_alignment_at_offset(getArraySubType(field_type), offset)
 
-	elif isNodeClassType(field_type):
-		fields = getClassWithName(field_type).fields
+	elif (node_class := get_class_from_name(field_type)) is not None:
+		fields = node_class.fields
 		if len(fields) == 0:
 			return 0
 		longest_field = None
 		for field in fields:
 			field_type = markUpFieldType(field[1])
 			field_alignment = get_alignment_at_offset(field_type, offset)
-			if longest_field == None or longest_field < field_alignment:
+			if not longest_field or longest_field < field_alignment:
 				longest_field = field_alignment
 				
 		return longest_field

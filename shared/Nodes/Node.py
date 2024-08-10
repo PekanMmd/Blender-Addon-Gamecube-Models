@@ -1,3 +1,6 @@
+from .NodeTypes import get_type_length
+
+
 # Abstract node class
 class Node(object):
     # The name of this type of Node
@@ -70,7 +73,10 @@ class Node(object):
 
     # Tells the builder how many bytes to reserve for this node.
     def allocationSize(self):
-        pass
+        size = 0
+        for field in self.fields:
+            size += get_type_length(field)
+        return size
 
     # Tells the builder how far into the reserved region the node itself should start.
     # Some nodes may need to output some data within that region so pointers to the node need to
@@ -83,7 +89,7 @@ class Node(object):
     def writeBinary(self, builder):
         if self.address == None:
             return
-        builder.writeNode(self)
+        builder.writeNode(self, relative_to_header=True)
 
     # TODO: confirm if the convention is depth first or breadth first write.
     # Converts the node tree into an list of every node present in the tree.

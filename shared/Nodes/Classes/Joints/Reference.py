@@ -28,7 +28,7 @@ class Reference(Node):
 
 
     def writeBinary(self, builder):
-        if self.property == None:
+        if not self.property:
             self.flags = 0
 
         elif isinstance(self.property, Joint):
