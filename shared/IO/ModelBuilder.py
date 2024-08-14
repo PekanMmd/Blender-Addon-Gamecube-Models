@@ -36,7 +36,7 @@ class ModelBuilder(object):
 		disjoint_lightset = LightSet.emptySet()
 
 		for section in sections:
-			if section.root_node == None:
+			if section.root_node is None:
 				continue
 
 			if isinstance(section.root_node, Joint):
@@ -72,25 +72,25 @@ class ModelBuilder(object):
 			elif isinstance(section.root_node, SceneData):
 				scene_data = section.root_node
 
-				if scene_data.camera != None:
+				if scene_data.camera is not None:
 					self.cameras.append(scene_data.camera)
 
-				if scene_data.fog != None:
+				if scene_data.fog is not None:
 					self.fogs.append(scene_data.fog)
 
-				if scene_data.lights != None:
+				if scene_data.lights is not None:
 					self.lights += scene_data.lights
 
-				if scene_data.models != None:
+				if scene_data.models is not None:
 					self.models += scene_data.models
 
-		if disjoint_modelset.root_joint != None:
+		if disjoint_modelset.root_joint is not None:
 			self.models.append(disjoint_modelset)
 
-		if disjoint_cameraset.camera != None:
+		if disjoint_cameraset.camera is not None:
 			self.cameras.append(disjoint_cameraset)
 
-		if disjoint_lightset.light != None:
+		if disjoint_lightset.light is not None:
 			self.lights.append(disjoint_lightset)
 
 	def build(self):
@@ -112,7 +112,7 @@ class ModelBuilder(object):
 
 	# TODO: complete implementation
 	def importModel(self, model):
-		if model == None:
+		if model is None:
 			return
 		model.prepareForBlender(self)
 		armature = model.build(self)

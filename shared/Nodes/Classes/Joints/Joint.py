@@ -4,6 +4,9 @@ from mathutils import Matrix, Euler, Vector
 
 from ...Node import Node
 from ....Constants import *
+from ..Rendering.Particle import Particle
+from ..Misc.Spline import Spline
+
 
 # Joint (aka Bone)
 class Joint(Node):
@@ -55,7 +58,7 @@ class Joint(Node):
             self.flags = 0
             self.property = self.property.address
 
-        if isHidden:
+        if self.isHidden:
             self.flags |= JOBJ_HIDDEN
 
         super().writeBinary(builder)

@@ -82,7 +82,7 @@ class RGB5A3Color(Node, Color):
     def writeBinary(self, builder):
         self.raw_value = 0
         
-        if alpha == 0xFF:
+        if self.alpha == 0xFF:
             self.raw_value += 1 << 15
             self.raw_value += (self.red / 8)   << 10
             self.raw_value += (self.green / 8) << 5
@@ -174,7 +174,7 @@ class RGBA6Color(Node, Color):
 
     def loadFromBinary(self, parser):
         super().loadFromBinary(parser)
-        raw_value = (raw_bytes[0] << 16) + (raw_bytes[1] << 8) + raw_bytes[2]
+        # raw_value = (raw_bytes[0] << 16) + (raw_bytes[1] << 8) + raw_bytes[2]
         self.red = (self.raw_value >> 18) << 2
         self.green = ((self.raw_value >> 12) & 0x3F) << 2
         self.blue = ((self.raw_value >> 6) & 0x3F) << 2

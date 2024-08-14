@@ -1,5 +1,7 @@
 from ...Node import Node
 from ....Constants import *
+from . import Attn, PointLight, SpotLight
+
 
 # Light
 class Light(Node):
@@ -41,12 +43,12 @@ class Light(Node):
             self.attn_flags = 0
             self.property = self.property.address
 
-        elif isinstance(self.property, PointLight):
+        elif isinstance(self.property, PointLight.PointLight):
             self.flags = LOBJ_POINT
             self.attn_flags = 0
             self.property = self.property.address
 
-        elif isinstance(self.property, SpotLight):
+        elif isinstance(self.property, SpotLight.SpotLight):
             self.flags = LOBJ_SPOT
             self.attn_flags = 0
             self.property = self.property.address

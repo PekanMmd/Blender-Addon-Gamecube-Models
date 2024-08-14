@@ -13,31 +13,22 @@ bl_info = {
 
 
 if "bpy" in locals():
-    import importlib
+    pass
 
-import os
-import bpy
-from bpy.props import (
-        CollectionProperty,
-        StringProperty,
-        BoolProperty,
-        EnumProperty,
-        FloatProperty,
-        IntProperty,
-)
 from bpy_extras.io_utils import (
         ImportHelper,
         ExportHelper,
         axis_conversion,
 )
 
-from .importer import *
 from .exporter import *
+from .importer import *
+
 
 # This class declares global properties which blender uses to add toggles and fields to the file open browser
 # allowing more options to be selected along with the filepath being opened.
 # When a file is selected the execute() function runs.
-class ImportHSD(bpy.types.Operator, ImportHelper):
+class ImportHSD(bpy.types.Operator, bpy_extras.io_utils.ImportHelper):
     """Load a DAT model"""
     bl_idname = "import_model.dat"
     bl_label = "Import DAT"
@@ -53,7 +44,7 @@ class ImportHSD(bpy.types.Operator, ImportHelper):
     max_frame: bpy.props.IntProperty(default = 1000, name = 'Max Anim Frame', description = 'Cutoff frame after which animations aren\'t sampled. Use 0 For no limit.')
 
     filename_ext = ".dat"
-    filter_glob = StringProperty(default="*.fdat;*.dat;*.rdat;*.pkx", options={'HIDDEN'})
+    filter_glob = bpy.props.StringProperty(default="*.fdat;*.dat;*.rdat;*.pkx", options={'HIDDEN'})
 
     def execute(self, context):
         if self.files and self.directory:

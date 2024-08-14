@@ -6,7 +6,7 @@ except:
 	from shared.IO import *
 	from shared.Nodes import SectionInfo
 
-class Exporter():
+class Exporter:
 
 	@staticmethod
 	def writeDAT(context, path):
